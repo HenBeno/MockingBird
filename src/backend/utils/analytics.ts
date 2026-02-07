@@ -8,11 +8,13 @@ let aliveInterval: any | null = null;
 const second = 60 * 1000;
 const minutes = second * 60;
 
+const DEFAULT_DEVICE_ID = 'mockingbird-server';
+
 const reportEvent = (
   event: string,
   args: Record<string, string | number | boolean>,
 ) => {
-  amplitude.track(event, args);
+  amplitude.track(event, args, { device_id: DEFAULT_DEVICE_ID });
 };
 
 export const initAnalytics = async ({
@@ -30,10 +32,10 @@ export const initAnalytics = async ({
   );
 
   const identifyObj = new Identify();
+  identifyObj.set('app_version', pj.version);
+  identifyObj.set('platform', platform);
   identify(identifyObj, {
-    // user_id: 'user@amplitude.com',
-    app_version: pj.version,
-    platform,
+    device_id: DEFAULT_DEVICE_ID,
   });
 
   if (aliveInterval !== null) {

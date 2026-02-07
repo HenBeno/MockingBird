@@ -1,4 +1,4 @@
-import { useRef, useState } from 'react';
+import { useMemo, useRef, useState } from 'react';
 import { useLoggerStore } from '../../state/logger';
 import { Console } from './console';
 import { CommandsTerminal } from './terminal/terminal';
@@ -8,6 +8,7 @@ import { ConsoleDialog } from '../dialogs/consoleDialog';
 import { reportButtonClick } from '../../utils';
 import { BUTTONS } from '../../../consts/analytics';
 import { ServersLogs } from './serversLogs';
+import { exportLogsToFile } from '../../utils';
 
 type TabIds = 'console' | 'terminal' | 'serversLogs';
 
@@ -25,7 +26,7 @@ type Props = {
 };
 
 function DevTools({ onMinimize, onCenter, onMaximize, devToolsHeight }: Props) {
-  const { resetLoggerState, serverLogs } = useLoggerStore();
+  const { resetLoggerState, serverLogs, selectedLogIds } = useLoggerStore();
   const [openConsoleDialog, setOpenConsoleDialog] = useState(false);
   const [search, setSearch] = useState('');
   const serversLogsRef = useRef<{ clear: () => void } | null>(null);
@@ -33,6 +34,32 @@ function DevTools({ onMinimize, onCenter, onMaximize, devToolsHeight }: Props) {
   const [selectedId, setSelectedId] = useState<TabIds>('console');
   const showClear = ['console', 'serversLogs'].includes(selectedId);
   const isConsole = selectedId === 'console';
+
+  const filteredServerLogs = useMemo(
+    () =>
+      serverLogs.filter((item) =>
+        JSON.stringify(item).toLowerCase().includes(search || '')
+      ),
+    [serverLogs, search]
+  );
+
+  const exportSelectedCount = useMemo(
+    () =>
+      filteredServerLogs.filter((log) =>
+        selectedLogIds.includes(log.metadata.id)
+      ).length,
+    [filteredServerLogs, selectedLogIds]
+  );
+
+  const handleExportAll = () => {
+    exportLogsToFile(filteredServerLogs);
+  };
+
+  const handleExportSelected = () => {
+    exportLogsToFile(
+      filteredServerLogs.filter((log) => selectedLogIds.includes(log.metadata.id))
+    );
+  };
 
   const handleClear = () => {
     reportButtonClick(BUTTONS.CONSOLE_CLEAR);
@@ -96,6 +123,10 @@ function DevTools({ onMinimize, onCenter, onMaximize, devToolsHeight }: Props) {
           showFullScreen={isConsole}
           showClear={showClear}
           showSearch={isConsole}
+          showExport={isConsole}
+          onExportAll={handleExportAll}
+          onExportSelected={handleExportSelected}
+          exportSelectedCount={exportSelectedCount}
         />
       </div>
 

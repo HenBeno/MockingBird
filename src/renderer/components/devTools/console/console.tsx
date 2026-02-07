@@ -24,7 +24,7 @@ type Props = {
 };
 
 export function Console({ search }: Props) {
-  const { serverLogs } = useLoggerStore();
+  const { serverLogs, selectedLogIds, toggleLogSelection } = useLoggerStore();
   const { serversHash } = useProjectStore();
 
   const [parent, setParent] = useState<RouteParent | null>(null);
@@ -178,28 +178,35 @@ export function Console({ search }: Props) {
                   itemSize={getSize}
                   itemData={filteredServerLogs}
                 >
-                  {({ data, index, style }) => (
-                    <div style={style}>
-                      <LogRow
-                        data={data}
-                        index={index}
-                        setSize={setSize}
-                        windowWidth={windowWidth}
-                        onAddResponseClick={handleAddResponseClick}
-                        onAddRouteClick={handleAddRouteClick}
-                        onAddParentClick={handleAddParentClick}
-                        onAddQueryClick={handleAddQueryClick}
-                        onAddQueryResponseClick={handleAddQueryResponseClick}
-                        openRows={openRows}
-                        onRowClick={(id) => {
-                          setOpenRows((prev) => {
-                            prev[id] = !prev[id];
-                            return prev;
-                          });
-                        }}
-                      />
-                    </div>
-                  )}
+                  {({ data, index, style }) => {
+                    const logData = data[data.length - index - 1];
+                    return (
+                      <div style={style}>
+                        <LogRow
+                          data={data}
+                          index={index}
+                          setSize={setSize}
+                          windowWidth={windowWidth}
+                          isSelected={selectedLogIds.includes(logData.metadata.id)}
+                          onToggleSelect={() =>
+                            toggleLogSelection(logData.metadata.id)
+                          }
+                          onAddResponseClick={handleAddResponseClick}
+                          onAddRouteClick={handleAddRouteClick}
+                          onAddParentClick={handleAddParentClick}
+                          onAddQueryClick={handleAddQueryClick}
+                          onAddQueryResponseClick={handleAddQueryResponseClick}
+                          openRows={openRows}
+                          onRowClick={(id) => {
+                            setOpenRows((prev) => {
+                              prev[id] = !prev[id];
+                              return prev;
+                            });
+                          }}
+                        />
+                      </div>
+                    );
+                  }}
                 </VariableSizeList>
               );
             }}

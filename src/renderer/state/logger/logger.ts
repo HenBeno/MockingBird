@@ -5,16 +5,21 @@ import { ServerLog } from '../../../types';
 export type LoggerStateFuncs = {
   resetLoggerState: () => void;
   addServerLog: (log: ServerLog) => void;
+  toggleLogSelection: (id: string) => void;
+  selectAllLogs: (ids: string[]) => void;
+  clearLogSelection: () => void;
 };
 
 export type LoggerStateProps = {
   serverLogs: ServerLog[];
+  selectedLogIds: string[];
 };
 
 export type SettingsState = LoggerStateFuncs & LoggerStateProps;
 
 const INIT_STATE: LoggerStateProps = {
   serverLogs: [],
+  selectedLogIds: [],
 };
 
 export const useLoggerStore = create<SettingsState>((set) => {
@@ -37,5 +42,16 @@ export const useLoggerStore = create<SettingsState>((set) => {
       logBuffer.push(newLog);
       throttledFlushLogs(); // Ensure logs are flushed at regular intervals
     },
+    toggleLogSelection: (id) =>
+      set((state) => {
+        const has = state.selectedLogIds.includes(id);
+        return {
+          selectedLogIds: has
+            ? state.selectedLogIds.filter((x) => x !== id)
+            : [...state.selectedLogIds, id],
+        };
+      }),
+    selectAllLogs: (ids) => set({ selectedLogIds: ids }),
+    clearLogSelection: () => set({ selectedLogIds: [] }),
   };
 });

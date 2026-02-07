@@ -1,5 +1,7 @@
-import { IconButton, InputBase, Tooltip } from '@mui/material';
+import { useState } from 'react';
+import { IconButton, InputBase, Menu, MenuItem, Tooltip } from '@mui/material';
 import DeleteIcon from '@mui/icons-material/Delete';
+import DownloadIcon from '@mui/icons-material/Download';
 import KeyboardDoubleArrowUpIcon from '@mui/icons-material/KeyboardDoubleArrowUp';
 import KeyboardDoubleArrowDownIcon from '@mui/icons-material/KeyboardDoubleArrowDown';
 import FullscreenIcon from '@mui/icons-material/Fullscreen';
@@ -20,6 +22,10 @@ type Props = {
   showClear: boolean;
   showSearch: boolean;
   showCenter: boolean;
+  showExport?: boolean;
+  onExportAll?: () => void;
+  onExportSelected?: () => void;
+  exportSelectedCount?: number;
 };
 
 export function RightTopBar({
@@ -36,7 +42,31 @@ export function RightTopBar({
   showFullScreen,
   showClear,
   showSearch,
+  showExport,
+  onExportAll,
+  onExportSelected,
+  exportSelectedCount = 0,
 }: Props) {
+  const [exportAnchorEl, setExportAnchorEl] = useState<null | HTMLElement>(
+    null
+  );
+  const exportMenuOpen = Boolean(exportAnchorEl);
+
+  const handleExportMenuOpen = (event: React.MouseEvent<HTMLElement>) => {
+    setExportAnchorEl(event.currentTarget);
+  };
+  const handleExportMenuClose = () => {
+    setExportAnchorEl(null);
+  };
+  const handleExportAll = () => {
+    onExportAll?.();
+    handleExportMenuClose();
+  };
+  const handleExportSelected = () => {
+    onExportSelected?.();
+    handleExportMenuClose();
+  };
+
   return (
     <div className={styles.endContainer}>
       {showSearch && (
@@ -54,6 +84,37 @@ export function RightTopBar({
         </div>
       )}
 
+      {showExport && onExportAll && (
+        <>
+          <Tooltip title="Export">
+            <IconButton
+              edge="start"
+              color="inherit"
+              onClick={handleExportMenuOpen}
+              aria-label="export"
+              size="small"
+            >
+              <DownloadIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+          <Menu
+            anchorEl={exportAnchorEl}
+            open={exportMenuOpen}
+            onClose={handleExportMenuClose}
+            anchorOrigin={{ vertical: 'bottom', horizontal: 'right' }}
+            transformOrigin={{ vertical: 'top', horizontal: 'right' }}
+          >
+            <MenuItem onClick={handleExportAll}>Export all</MenuItem>
+            <MenuItem
+              onClick={handleExportSelected}
+              disabled={!exportSelectedCount}
+            >
+              Export selected
+              {exportSelectedCount > 0 && ` (${exportSelectedCount})`}
+            </MenuItem>
+          </Menu>
+        </>
+      )}
       {showClear && (
         <Tooltip title="clear all">
           <IconButton
