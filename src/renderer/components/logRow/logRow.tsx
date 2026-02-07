@@ -18,6 +18,8 @@ type props = {
   index: number;
   setSize: (index: number, height: number) => void;
   windowWidth: number;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
   onRowClick: (id: string) => void;
   openRows: { [key: string]: boolean };
   onAddParentClick: ({
@@ -68,6 +70,8 @@ function LogRow({
   index,
   setSize,
   windowWidth,
+  isSelected,
+  onToggleSelect,
   onRowClick,
   onAddParentClick,
   onAddRouteClick,
@@ -90,6 +94,8 @@ function LogRow({
             setSize={setSize}
             windowWidth={windowWidth}
             onRowClick={onRowClick}
+            isSelected={isSelected}
+            onToggleSelect={onToggleSelect}
           />
         }
       >
@@ -100,6 +106,8 @@ function LogRow({
           setSize={setSize}
           windowWidth={windowWidth}
           onRowClick={onRowClick}
+          isSelected={isSelected}
+          onToggleSelect={onToggleSelect}
           onAddParentClick={onAddParentClick}
           onAddQueryClick={onAddQueryClick}
           onAddQueryResponseClick={onAddQueryResponseClick}
@@ -115,6 +123,8 @@ function LogRow({
       setSize={setSize}
       windowWidth={windowWidth}
       onRowClick={onRowClick}
+      isSelected={isSelected}
+      onToggleSelect={onToggleSelect}
       onAddParentClick={onAddParentClick}
       onAddRouteClick={onAddRouteClick}
       onAddResponseClick={onAddResponseClick}

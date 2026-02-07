@@ -9,6 +9,7 @@
  * `./src/main.js` using webpack. This gives us some performance wins.
  */
 import path from 'path';
+import fs from 'fs';
 import { app, BrowserWindow, shell, dialog, ipcMain } from 'electron';
 import { autoUpdater } from 'electron-updater';
 import log from 'electron-log';
@@ -265,5 +266,30 @@ ipcMain.on('openProjectDirectory', async (event, args) => {
     }
   } catch (error) {
     event.reply('openProjectDirectory', { success: false, error });
+  }
+});
+
+ipcMain.on(EVENT_KEYS.EXPORT_CONSOLE_LOGS, async (event, args: { content: string }) => {
+  try {
+    const { content } = args || {};
+    const result = await dialog.showSaveDialog(mainWindow as BrowserWindow, {
+      defaultPath: 'console-export.json',
+      filters: [{ name: 'JSON', extensions: ['json'] }],
+    });
+    if (result.canceled || !result.filePath) {
+      event.reply(EVENT_KEYS.EXPORT_CONSOLE_LOGS, { success: false, canceled: true });
+      return;
+    }
+    fs.writeFile(result.filePath, content, (err) => {
+      event.reply(EVENT_KEYS.EXPORT_CONSOLE_LOGS, {
+        success: !err,
+        error: err?.message,
+      });
+    });
+  } catch (error) {
+    event.reply(EVENT_KEYS.EXPORT_CONSOLE_LOGS, {
+      success: false,
+      error: error instanceof Error ? error.message : String(error),
+    });
   }
 });

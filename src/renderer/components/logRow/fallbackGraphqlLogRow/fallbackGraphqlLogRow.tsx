@@ -7,6 +7,7 @@ import {
   ServerLog,
   ServerLogType,
 } from '../../../../types';
+import { Checkbox } from '@mui/material';
 import styles from './fallbackGraphqlLogRow.module.css';
 import {
   formatDate,
@@ -39,6 +40,8 @@ type props = {
   windowWidth: number;
   onRowClick: (id: string) => void;
   openRows: { [key: string]: boolean };
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 };
 
 export function FallbackGraphqlLogRow({
@@ -48,6 +51,8 @@ export function FallbackGraphqlLogRow({
   setSize,
   windowWidth,
   onRowClick,
+  isSelected,
+  onToggleSelect,
 }: props) {
   const rowRef = useRef<any>(null);
   const logData = data[data.length - index - 1];
@@ -83,6 +88,17 @@ export function FallbackGraphqlLogRow({
           onRowClick(logData.metadata.id);
         }}
       >
+        {onToggleSelect && (
+          <Checkbox
+            size="small"
+            checked={!!isSelected}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSelect();
+            }}
+            sx={{ p: 0.5 }}
+          />
+        )}
         <div className="type-e-url">
           <div className="type" style={{ backgroundColor: getBGColor(type) }}>
             {type}

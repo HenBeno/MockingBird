@@ -9,11 +9,12 @@ import Typography from '@mui/material/Typography';
 import CloseIcon from '@mui/icons-material/Close';
 import TextField from '@mui/material/TextField';
 import Button from '@mui/material/Button';
-import { useState } from 'react';
+import { useMemo, useState } from 'react';
 import { Console } from '../../devTools/console';
 import { reportButtonClick } from '../../../utils';
 import { BUTTONS } from '../../../../consts/analytics';
 import { useLoggerStore } from '../../../state/logger';
+import { exportLogsToFile } from '../../../utils';
 
 const Transition = React.forwardRef(function Transition(
   props: TransitionProps & {
@@ -31,9 +32,25 @@ type Props = {
 };
 
 export function ConsoleDialog({ open, onClose }: Props) {
-  const { resetLoggerState } = useLoggerStore();
+  const { resetLoggerState, serverLogs, selectedLogIds } = useLoggerStore();
 
   const [search, setSearch] = useState('');
+
+  const filteredServerLogs = useMemo(
+    () =>
+      serverLogs.filter((item) =>
+        JSON.stringify(item).toLowerCase().includes(search || '')
+      ),
+    [serverLogs, search]
+  );
+
+  const exportSelectedCount = useMemo(
+    () =>
+      filteredServerLogs.filter((log) =>
+        selectedLogIds.includes(log.metadata.id)
+      ).length,
+    [filteredServerLogs, selectedLogIds]
+  );
 
   function handleClose() {
     reportButtonClick(BUTTONS.CONSOLE_CLOSE);
@@ -43,6 +60,16 @@ export function ConsoleDialog({ open, onClose }: Props) {
   const handleClear = () => {
     reportButtonClick(BUTTONS.CONSOLE_CLEAR);
     resetLoggerState();
+  };
+
+  const handleExportAll = () => {
+    exportLogsToFile(filteredServerLogs);
+  };
+
+  const handleExportSelected = () => {
+    exportLogsToFile(
+      filteredServerLogs.filter((log) => selectedLogIds.includes(log.metadata.id))
+    );
   };
 
   return (
@@ -83,6 +110,18 @@ export function ConsoleDialog({ open, onClose }: Props) {
               variant="filled"
             />
           </div>
+          <Button variant="outlined" color="inherit" onClick={handleExportAll}>
+            Export all
+          </Button>
+          <Button
+            variant="outlined"
+            color="inherit"
+            onClick={handleExportSelected}
+            disabled={exportSelectedCount === 0}
+          >
+            Export selected
+            {exportSelectedCount > 0 && ` (${exportSelectedCount})`}
+          </Button>
           <Button variant="outlined" color="inherit" onClick={handleClear}>
             Clear
           </Button>

@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from 'react';
 import JsonView from '@uiw/react-json-view';
 import { vscodeTheme } from '@uiw/react-json-view/vscode';
-import { Button, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
+import { Button, Checkbox, IconButton, Menu, MenuItem, Tooltip } from '@mui/material';
 import { parse } from 'graphql';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import {
@@ -98,6 +98,8 @@ type props = {
     matchedRoute: GraphQlRoute;
     data: Partial<GraphQlRouteResponse>;
   }) => void;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 };
 
 export function GraphqlLogRow({
@@ -110,6 +112,8 @@ export function GraphqlLogRow({
   onAddParentClick,
   onAddQueryClick,
   onAddQueryResponseClick,
+  isSelected,
+  onToggleSelect,
 }: props) {
   const { serversHash } = useProjectStore();
   const { setSelectedRoute } = useGeneralStore();
@@ -281,6 +285,17 @@ export function GraphqlLogRow({
           onRowClick(logData.metadata.id);
         }}
       >
+        {onToggleSelect && (
+          <Checkbox
+            size="small"
+            checked={!!isSelected}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSelect();
+            }}
+            sx={{ p: 0.5 }}
+          />
+        )}
         <div className="type-e-url">
           <div className="type" style={{ backgroundColor: getBGColor(type) }}>
             {type}

@@ -5,7 +5,7 @@ import React, { useEffect, useMemo, useRef, useState } from 'react';
 import './restLogRow.css';
 import JsonView from '@uiw/react-json-view';
 import { vscodeTheme } from '@uiw/react-json-view/vscode';
-import { Button, IconButton, Tooltip } from '@mui/material';
+import { Button, Checkbox, IconButton, Tooltip } from '@mui/material';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import {
   formatDate,
@@ -109,6 +109,8 @@ type props = {
     data: RouteResponse;
     serverName: string;
   }) => void;
+  isSelected?: boolean;
+  onToggleSelect?: () => void;
 };
 
 export function RestLogRow({
@@ -121,6 +123,8 @@ export function RestLogRow({
   onAddParentClick,
   onAddRouteClick,
   onAddResponseClick,
+  isSelected,
+  onToggleSelect,
 }: props) {
   const { serversHash } = useProjectStore();
   const { setSelectedRoute } = useGeneralStore();
@@ -304,6 +308,17 @@ export function RestLogRow({
           onRowClick(logData.metadata.id);
         }}
       >
+        {onToggleSelect && (
+          <Checkbox
+            size="small"
+            checked={!!isSelected}
+            onClick={(e) => {
+              e.stopPropagation();
+              onToggleSelect();
+            }}
+            sx={{ p: 0.5 }}
+          />
+        )}
         <div className="type-e-url">
           <div className="type" style={{ backgroundColor: getBGColor() }}>
             {type}
